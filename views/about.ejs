@@ -7,24 +7,9 @@
   <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6">
-    <div class="flex items-center flex-shrink-0 text-white mr-6">
-      <span class="font-semibold text-xl tracking-tight">Lego Collection</span>
-    </div>
-    <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-      <div class="text-sm lg:flex-grow">
-        <a href="/" class="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-400 mr-4">Home</a>
-        <a href="/about" class="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-400 mr-4 active">About</a>
-        <div class="group mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-400 mr-4">
-          <span class="group-hover:text-gray-400 cursor-pointer">Theme</span>
-          <div class="group-hover:block hidden absolute bg-white border rounded-lg">
-            <a href="/lego/sets?theme=someTheme" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Some Theme</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
+  
+  <%- include('partials/navbar', { page: '/about' }) %>
+
 
   <!-- Page Content -->
   <div class="container mx-auto">
