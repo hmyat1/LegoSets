@@ -16,10 +16,11 @@
     <div class="hero bg-gray-100">
       <h1 class="text-4xl font-bold text-center my-8">Lego Sets Collection</h1>
       <div class="text-center mb-4">
-        <a href="/lego/sets?theme=Technic" class="btn mx-2">Technic</a>
-        <a href="/lego/sets?theme=Classic" class="btn mx-2">Classic</a>
-        <a href="/lego/sets?theme=Space" class="btn mx-2">Space</a>
-        <!-- Add more links for other themes as needed -->
+        <!-- Removed hardcoded theme links -->
+        <!-- Use dynamic theme links based on available themes -->
+        <% themes.forEach(theme => { %>
+          <a href="/lego/sets?theme=<%= theme.name %>" class="btn mx-2"> <%= theme.name %> </a>
+        <% }); %>
       </div>
     </div>
 
@@ -51,7 +52,7 @@
               </td>
               <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
                 <div class="text-sm leading-5 text-gray-900">
-                  <a href="/lego/sets?theme=<%= set.theme %>" class="btn"> <%= set.theme %> </a>
+                  <a href="/lego/sets?theme=<%= set.Theme.name %>" class="btn"> <%= set.Theme.name %> </a>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">

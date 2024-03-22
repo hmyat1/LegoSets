@@ -1,76 +1,107 @@
-const setData = require("../data/setData");
-const themeData = require("../data/themeData");
+require('dotenv').config();
+const Sequelize = require('sequelize');
+const { Set, Theme } = require('./models'); // Import your Sequelize models
 
-let sets = [];
+const sequelize = new Sequelize({
+  database: process.env.PGDATABASE,
+  username: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  host: process.env.PGHOST,
+  dialect: 'postgres',
+  define: {
+    timestamps: false, // Disable createdAt and updatedAt fields
+  },
+});
 
-function initialize() {
-    return new Promise((resolve, reject) => {
-        sets = [];
-        setData.forEach(set => {
-            const theme = themeData.find(theme => theme.id === set.theme_id);
-            if (theme) {
-                sets.push({
-                    ...set,
-                    theme: theme.name
-                });
-            }
-        });
-        resolve();
-    });
+// Define the Theme and Set models
+const ThemeModel = sequelize.define('Theme', {
+  id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: Sequelize.STRING,
+});
+
+const SetModel = sequelize.define('Set', {
+  set_num: {
+    type: Sequelize.STRING,
+    primaryKey: true,
+  },
+  name: Sequelize.STRING,
+  year: Sequelize.INTEGER,
+  num_parts: Sequelize.INTEGER,
+  theme_id: Sequelize.INTEGER,
+  img_url: Sequelize.STRING,
+});
+
+// Establish the association between Set and Theme
+SetModel.belongsTo(ThemeModel, { foreignKey: 'theme_id' });
+
+// Sync the models with the database
+async function initialize() {
+  try {
+    await sequelize.sync();
+    console.log("Database synchronized.");
+  } catch (error) {
+    console.error("Error synchronizing database:", error);
+    throw error;
+  }
 }
 
-function getAllSets() {
-    return new Promise((resolve, reject) => {
-        if (sets.length > 0) {
-            resolve(sets);
-        } else {
-            reject("No sets available.");
+// Function to add a new set to the database
+async function addSet(setData) {
+  try {
+    await SetModel.create(setData);
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Function to get all themes from the database
+async function getAllThemes() {
+  try {
+    return await ThemeModel.findAll();
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Function to get all sets with their associated themes from the database
+async function getAllSets() {
+  try {
+    return await SetModel.findAll({ include: [ThemeModel] });
+  } catch (error) {
+    console.error("Error fetching sets:", error);
+    throw error;
+  }
+}
+
+// Function to get a set by its set_num with its associated theme from the database
+async function getSetByNum(setNum) {
+  try {
+    return await SetModel.findOne({ where: { set_num: setNum }, include: [ThemeModel] });
+  } catch (error) {
+    console.error("Error fetching set by number:", error);
+    throw error;
+  }
+}
+
+// Function to get sets by a specific theme from the database
+async function getSetsByTheme(theme) {
+  try {
+    return await SetModel.findAll({
+      include: [ThemeModel],
+      where: {
+        '$Theme.name$': {
+          [Sequelize.Op.iLike]: `%${theme}%`
         }
+      }
     });
+  } catch (error) {
+    console.error("Error fetching sets by theme:", error);
+    throw error;
+  }
 }
 
-function getSetByNum(setNum) {
-    return new Promise((resolve, reject) => {
-        const set = sets.find(set => set.set_num === setNum);
-        if (set) {
-            resolve(set);
-        } else {
-            reject("Set not found.");
-        }
-    });
-}
-
-function getSetsByTheme(theme) {
-    return new Promise((resolve, reject) => {
-        const lowercaseTheme = theme.toLowerCase();
-        const matchingSets = sets.filter(set => set.theme.toLowerCase().includes(lowercaseTheme));
-        if (matchingSets.length > 0) {
-            resolve(matchingSets);
-        } else {
-            reject("Sets not found for the provided theme.");
-        }
-    });
-}
-
-module.exports = { initialize, getAllSets, getSetByNum, getSetsByTheme };
-
-// Testing
-initialize()
-    .then(() => {
-        console.log("Initialization complete.");
-        return getAllSets();
-    })
-    .then(allSets => {
-        console.log("All sets:", allSets);
-        return getSetByNum("05-1"); 
-    })
-    .then(set => {
-        console.log("Set by number:", set);
-        return getSetsByTheme("Service Packs"); 
-    })
-    .then(setsByTheme => {
-        console.log("Sets by theme:", setsByTheme);
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
+module.exports = { initialize, addSet, getAllThemes, getAllSets, getSetByNum, getSetsByTheme };
